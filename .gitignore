@@ -1,0 +1,42 @@
+# Secret keys — NEVER commit this
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Generated outputs
+outputs/*.xlsx
+outputs/*.txt
+outputs/*.csv
+outputs/*.log
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Additional StoryForge ignores
+
+.venv-1/
+
+
+reports/
+
+.vscode/
+
+.coverage
+htmlcov/
+
+build/
+dist/
+*.egg-info/
