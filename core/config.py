@@ -8,9 +8,12 @@ them as a single `settings` object used across the app.
 import os
 from dotenv import load_dotenv
 
-# Load the .env file from the project root
-load_dotenv()
+try:
+    import streamlit as st
+except ImportError:
+    st = None
 
+load_dotenv()
 
 class Settings:
     """
@@ -19,12 +22,16 @@ class Settings:
     """
 
     # ── Gemini AI ──────────────────────────────────────
+try:
+    GEMINI_API_KEY: str = st.secrets["GEMINI_API_KEY"]
+except Exception:
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    
     GEMINI_MODEL: str   = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
 
     # ── App Identity ───────────────────────────────────
     APP_TITLE: str      = os.getenv("APP_TITLE", "StoryForge")
-    APP_VERSION: str    = os.getenv("APP_VERSION", "3.0")
+    APP_VERSION: str = os.getenv("APP_VERSION", "1.0.0") 
 
     # ── StoryForge branding ────────────────────────────
     APP_NAME: str    = "StoryForge"
