@@ -312,7 +312,7 @@ st.markdown(
     <div style="margin-top:3rem;padding-top:1.25rem;border-top:1px solid {c['border']};
          display:flex;justify-content:space-between;align-items:center;">
         <div style="font-size:.72rem;color:{c['text_muted']};">
-            <strong style="color:{c['text_secondary']};">StoryForge v3.0</strong>
+            <strong style="color:{c['text_secondary']};">StoryForge v1.0.0s</strong>
             &nbsp;&#183;&nbsp; Cloud Counselage Pvt. Ltd.
             &nbsp;&#183;&nbsp; IAC Vision 2030
         </div>
