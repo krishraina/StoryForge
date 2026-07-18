@@ -20,7 +20,7 @@
 
 **StoryForge is deployed on Streamlit Community Cloud.**
 
-👉 https://storyforge-2sc5b9eikrib5dmc9mahsb.streamlit.app
+👉 https://krish-toryforge.streamlit.app
 
 # Overview
 
