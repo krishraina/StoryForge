@@ -11,7 +11,7 @@
 ![SQLite](https://img.shields.io/badge/SQLite-Database-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
 ![Google Gemini](https://img.shields.io/badge/Google-Gemini_AI-4285F4?style=for-the-badge&logo=google&logoColor=white)
 ![Live Demo](https://img.shields.io/badge/Live-Demo-success?style=for-the-badge)
-(https://storyforge-2sc5b9eikrib5dmc9mahsb.streamlit.app)
+(https://krish-storyforge.streamlit.app)
 </div>
 
 ---
