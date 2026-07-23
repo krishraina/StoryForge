@@ -343,7 +343,7 @@ class ReportPayload:
         self.export_date       = now.strftime("%d %B %Y")
         self.export_time       = now.strftime("%H:%M:%S")
         self.ai_model          = "Google Gemini 2.0 Flash"
-        self.generator_version = "IAC Story Generator v3.0"
+        self.generator_version = "IAC Story Generator v1.0.0"
         self.organization      = "Cloud Counselage Pvt. Ltd."
         self.initiative        = "Industry Academia Community (IAC) — Vision 2030"
 

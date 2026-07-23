@@ -3,6 +3,7 @@ services/gemini_service.py
 Sequential generation with retry logic. Uses new google-genai SDK.
 """
 
+import json
 import time
 import random
 import logging
@@ -10,7 +11,7 @@ from google import genai
 from google.genai import types
 
 from core.config import settings
-from services.prompt_builder import build_prompt
+from services.prompt_builder import build_prompt, build_extraction_prompt
 from core.constants import STORY_FORMATS
 
 logger = logging.getLogger(__name__)
@@ -149,3 +150,97 @@ def is_api_configured() -> bool:
 
 def count_words(text: str) -> int:
     return len(text.split()) if text else 0
+
+
+# ══════════════════════════════════════════════════════════════════════
+# DATA SOURCES — Evidence extraction (Phase: Data Sources MVP)
+# ══════════════════════════════════════════════════════════════════════
+
+def extract_participant_from_text(evidence_type: str, raw_text: str) -> dict:
+    """
+    Extracts an editorial participant profile from raw pasted text
+    (LinkedIn post, internship review, training review).
+
+    Sibling to generate_story() — same client pattern, single attempt
+    (no MAX_TOKENS/partial-content handling needed for structured JSON;
+    a broken response just surfaces as an error for manual entry).
+
+    Temperature is kept very low (0.1) — this is a structured extraction
+    task, not creative writing, so we want Gemini to stay close to the
+    source signal and the editorial-rewrite instructions in the prompt
+    rather than introducing variation between runs.
+
+    The participant "name" is intentionally NOT required here — LinkedIn
+    post bodies frequently omit the author's name (LinkedIn displays it
+    separately from the post text), so a missing name is an expected,
+    successful outcome, not an extraction failure. Name is only enforced
+    as required at SAVE time, in the review form on the Data Sources page.
+
+    Returns:
+        {"fields": {...}}  on success (name may be "")
+        {"error": "..."}   on failure (empty input / bad response / no signal at all)
+    """
+    if not raw_text or not raw_text.strip():
+        return {"error": "No text provided to extract from."}
+
+    prompt = build_extraction_prompt(evidence_type, raw_text)
+
+    try:
+        client = _get_client()
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                temperature=0.1,
+                max_output_tokens=1024,
+            ),
+        )
+
+        raw = (response.text or "").strip()
+        if not raw:
+            return {"error": "Empty response from AI model. Please try again or enter details manually."}
+
+        # Strip accidental markdown fences, just in case.
+        if raw.startswith("```"):
+            raw = raw.strip("`")
+            if raw.lower().startswith("json"):
+                raw = raw[4:].strip()
+
+        try:
+            parsed = json.loads(raw)
+        except json.JSONDecodeError:
+            return {"error": "Could not parse extracted data. Please enter details manually."}
+
+        # Gemini can return syntactically valid JSON that isn't the object
+        # shape we asked for (e.g. a bare list or string) — guard against
+        # that before calling .get() on it.
+        if not isinstance(parsed, dict):
+            return {"error": "Could not parse extracted data. Please enter details manually."}
+
+        expected_keys = [
+            "name", "email", "program", "domain", "background",
+            "achievements", "challenges", "outcomes", "linkedin_url",
+        ]
+        fields = {k: (parsed.get(k) or "").strip() for k in expected_keys}
+
+        # Name is no longer required for extraction to succeed — it's
+        # commonly absent from LinkedIn post bodies. The user fills it in
+        # (or edits it) during the review step before saving.
+        #
+        # We still guard against a genuinely empty/useless extraction —
+        # if EVERY profile field came back blank, there was nothing to
+        # extract at all, and surfacing that as an error (rather than a
+        # silently all-empty form) is more honest.
+        profile_fields = ("program", "domain", "background", "achievements", "challenges", "outcomes")
+        if not any(fields[k] for k in profile_fields):
+            return {
+                "error": (
+                    "Could not extract any usable participant information from this "
+                    "text. Please check the pasted content or enter details manually."
+                )
+            }
+
+        return {"fields": fields}
+
+    except Exception as exc:
+        return {"error": f"Extraction failed: {exc}"}

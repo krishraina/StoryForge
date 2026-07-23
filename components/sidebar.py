@@ -40,6 +40,7 @@ def render_sidebar():
         st.page_link("pages/4_Repository.py",     label="📚  Repository")
         st.page_link("pages/5_Exports.py",        label="📤  Exports")
         st.page_link("pages/6_Batch_Operations.py", label="🗂  Batch Operations")
+        st.page_link("pages/7_Data_Sources.py",   label="🧾  Data Sources")
 
         st.markdown(
             f"""
